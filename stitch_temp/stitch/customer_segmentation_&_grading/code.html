@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Customer Segmentation &amp; Grading - LOANER AI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#10b981", // Emerald 500
+                        "background-light": "#f9fafb",
+                        "background-dark": "#0a0a0a",
+                        "card-dark": "#141414",
+                        "border-dark": "#262626",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "16px",
+                    },
+                },
+            },
+        };
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .sidebar-item-active {
+            border-left: 4px solid #10b981;
+            background: linear-gradient(90deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0) 100%);
+        }
+        .radar-grid {
+            stroke: #333;
+            stroke-dasharray: 4;
+        }
+        .radar-area {
+            fill: rgba(16, 185, 129, 0.2);
+            stroke: #10b981;
+            stroke-width: 2;
+        }::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0a0a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #262626;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #333;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="flex h-screen overflow-hidden">
+<aside class="w-64 flex-shrink-0 border-r border-slate-200 dark:border-border-dark flex flex-col bg-white dark:bg-card-dark">
+<div class="p-6 flex items-center gap-3">
+<div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
+<span class="material-icons-round text-white text-2xl">insights</span>
+</div>
+<h1 class="text-xl font-bold tracking-tight uppercase">Loaner<span class="text-primary">.AI</span></h1>
+</div>
+<nav class="flex-1 mt-4 px-3 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors" href="#">
+<span class="material-icons-round">grid_view</span>
+<span class="font-medium">Dashboard</span>
+</a>
+<a class="sidebar-item-active flex items-center gap-3 px-4 py-3 text-primary transition-colors" href="#">
+<span class="material-icons-round">pie_chart</span>
+<span class="font-medium">Segmentation</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors" href="#">
+<span class="material-icons-round">account_balance_wallet</span>
+<span class="font-medium">Credit Analysis</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors" href="#">
+<span class="material-icons-round">description</span>
+<span class="font-medium">Loan Requests</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors" href="#">
+<span class="material-icons-round">security</span>
+<span class="font-medium">Risk Modeling</span>
+</a>
+<div class="pt-8 px-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Administration</div>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors" href="#">
+<span class="material-icons-round">settings</span>
+<span class="font-medium">Configuration</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-primary transition-colors" href="#">
+<span class="material-icons-round">help_outline</span>
+<span class="font-medium">Support</span>
+</a>
+</nav>
+<div class="p-4 border-t border-slate-200 dark:border-border-dark">
+<div class="flex items-center gap-3 p-2">
+<img alt="Profile" class="w-10 h-10 rounded-full border-2 border-primary/20" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC9QsC1N_15VjACKgK_XMA197DxyxM2kdVrffghn2viraN5twYfHeg4S66D14wzC5MpDPeeZp_yYTJGxQ6nawPxo06W40QYCPWr-6rvrbNO4BalG1JrXUAh-WqWAkgXeLJkeweSGLfJ7mvbF99bjBI0cpq-wGn7jZ8jQcmSuM7Z5oiRq8gaaaPtiftxRPFsfnyAeWmlVxZF-wgFnm2omAQt3aT9rpvtitsbmILYN0XCcrb5J5SzA71XlDbCsVoNkJ_9_dKrGBLoFm0"/>
+<div class="overflow-hidden">
+<p class="text-sm font-semibold truncate">Alex Henderson</p>
+<p class="text-xs text-slate-500">Senior Underwriter</p>
+</div>
+</div>
+</div>
+</aside>
+<main class="flex-1 flex flex-col overflow-hidden bg-background-light dark:bg-background-dark">
+<header class="h-20 flex items-center justify-between px-8 border-b border-slate-200 dark:border-border-dark bg-white/50 dark:bg-card-dark/50 backdrop-blur-md">
+<div class="relative w-96">
+<span class="material-icons-round absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+<input class="w-full bg-slate-100 dark:bg-neutral-800 border-none rounded-full py-2.5 pl-11 pr-4 focus:ring-2 focus:ring-primary/50 text-sm" placeholder="Search customers, reports or grades..." type="text"/>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2.5 rounded-full bg-slate-100 dark:bg-neutral-800 text-slate-500 hover:text-primary transition-colors">
+<span class="material-icons-round text-xl">notifications</span>
+</button>
+<button class="flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-full font-medium text-sm hover:brightness-110 transition-all shadow-lg shadow-primary/20">
+<span class="material-icons-round text-sm">add</span>
+                        New Assessment
+                    </button>
+</div>
+</header>
+<div class="flex-1 overflow-y-auto p-8">
+<div class="mb-8">
+<h2 class="text-3xl font-bold mb-2">Customer Segmentation</h2>
+<p class="text-slate-500 dark:text-slate-400">AI-driven risk clustering and profile distribution based on real-time market data.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+<div class="bg-white dark:bg-card-dark p-6 border border-slate-200 dark:border-border-dark">
+<div class="flex items-center justify-between mb-4">
+<span class="material-icons-round text-primary bg-primary/10 p-2 rounded-lg">groups</span>
+<span class="text-xs font-bold text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded">+12%</span>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-sm mb-1">Total Customers</p>
+<h3 class="text-2xl font-bold">24,510</h3>
+</div>
+<div class="bg-white dark:bg-card-dark p-6 border border-slate-200 dark:border-border-dark">
+<div class="flex items-center justify-between mb-4">
+<span class="material-icons-round text-blue-500 bg-blue-500/10 p-2 rounded-lg">verified</span>
+<span class="text-xs font-bold text-blue-500 bg-blue-500/10 px-2 py-1 rounded">High</span>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-sm mb-1">Avg. Credit Score</p>
+<h3 class="text-2xl font-bold">742</h3>
+</div>
+<div class="bg-white dark:bg-card-dark p-6 border border-slate-200 dark:border-border-dark">
+<div class="flex items-center justify-between mb-4">
+<span class="material-icons-round text-orange-500 bg-orange-500/10 p-2 rounded-lg">warning</span>
+<span class="text-xs font-bold text-red-500 bg-red-500/10 px-2 py-1 rounded">-4%</span>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-sm mb-1">Risk Exposure</p>
+<h3 class="text-2xl font-bold">$12.4M</h3>
+</div>
+<div class="bg-white dark:bg-card-dark p-6 border border-slate-200 dark:border-border-dark">
+<div class="flex items-center justify-between mb-4">
+<span class="material-icons-round text-purple-500 bg-purple-500/10 p-2 rounded-lg">trending_up</span>
+<span class="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded">Stable</span>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-sm mb-1">AI Confidence</p>
+<h3 class="text-2xl font-bold">98.2%</h3>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+<div class="lg:col-span-2 bg-white dark:bg-card-dark p-8 border border-slate-200 dark:border-border-dark">
+<div class="flex items-center justify-between mb-8">
+<div>
+<h3 class="text-xl font-bold">Risk Distribution Model</h3>
+<p class="text-sm text-slate-500">Multi-dimensional risk factor analysis</p>
+</div>
+<select class="bg-slate-100 dark:bg-neutral-800 border-none text-xs font-semibold rounded-lg">
+<option>Current Quarter</option>
+<option>Previous Quarter</option>
+</select>
+</div>
+<div class="flex items-center justify-center relative py-4">
+<svg class="w-full max-w-[320px] h-auto overflow-visible" viewBox="0 0 400 400">
+<polygon class="radar-grid fill-transparent stroke-slate-200 dark:stroke-neutral-800" points="200,40 360,120 360,280 200,360 40,280 40,120"></polygon>
+<polygon class="radar-grid fill-transparent stroke-slate-200 dark:stroke-neutral-800" points="200,80 320,140 320,260 200,320 80,260 80,140"></polygon>
+<polygon class="radar-grid fill-transparent stroke-slate-200 dark:stroke-neutral-800" points="200,120 280,160 280,240 200,280 120,240 120,160"></polygon>
+<line class="stroke-slate-200 dark:stroke-neutral-800" x1="200" x2="200" y1="40" y2="360"></line>
+<line class="stroke-slate-200 dark:stroke-neutral-800" x1="40" x2="360" y1="120" y2="280"></line>
+<line class="stroke-slate-200 dark:stroke-neutral-800" x1="360" x2="40" y1="120" y2="280"></line>
+<polygon class="radar-area" points="200,60 340,140 300,270 200,340 100,240 60,130"></polygon>
+<text class="text-[12px] fill-slate-500 font-medium" text-anchor="middle" x="200" y="25">Income Stability</text>
+<text class="text-[12px] fill-slate-500 font-medium" text-anchor="start" x="375" y="115">Debt-to-Income</text>
+<text class="text-[12px] fill-slate-500 font-medium" text-anchor="start" x="375" y="295">Credit History</text>
+<text class="text-[12px] fill-slate-500 font-medium" text-anchor="middle" x="200" y="385">Asset Liquidity</text>
+<text class="text-[12px] fill-slate-500 font-medium" text-anchor="end" x="25" y="295">Market Volatility</text>
+<text class="text-[12px] fill-slate-500 font-medium" text-anchor="end" x="25" y="115">AI Reliability</text>
+</svg>
+</div>
+</div>
+<div class="bg-white dark:bg-card-dark p-8 border border-slate-200 dark:border-border-dark flex flex-col">
+<h3 class="text-xl font-bold mb-1">Segmentation</h3>
+<p class="text-sm text-slate-500 mb-8">Customer cluster distribution</p>
+<div class="flex-1 space-y-6">
+<div class="space-y-2">
+<div class="flex justify-between text-sm mb-1">
+<span class="flex items-center gap-2 font-medium">
+<div class="w-3 h-3 rounded-full bg-primary"></div>
+                                        High-Value / Low-Risk
+                                    </span>
+<span class="font-bold">42%</span>
+</div>
+<div class="w-full bg-slate-100 dark:bg-neutral-800 h-2 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[42%]"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between text-sm mb-1">
+<span class="flex items-center gap-2 font-medium">
+<div class="w-3 h-3 rounded-full bg-blue-500"></div>
+                                        Standard Growth
+                                    </span>
+<span class="font-bold">35%</span>
+</div>
+<div class="w-full bg-slate-100 dark:bg-neutral-800 h-2 rounded-full overflow-hidden">
+<div class="bg-blue-500 h-full w-[35%]"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between text-sm mb-1">
+<span class="flex items-center gap-2 font-medium">
+<div class="w-3 h-3 rounded-full bg-orange-400"></div>
+                                        Emerging Subprime
+                                    </span>
+<span class="font-bold">18%</span>
+</div>
+<div class="w-full bg-slate-100 dark:bg-neutral-800 h-2 rounded-full overflow-hidden">
+<div class="bg-orange-400 h-full w-[18%]"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between text-sm mb-1">
+<span class="flex items-center gap-2 font-medium">
+<div class="w-3 h-3 rounded-full bg-red-500"></div>
+                                        Critical Review
+                                    </span>
+<span class="font-bold">5%</span>
+</div>
+<div class="w-full bg-slate-100 dark:bg-neutral-800 h-2 rounded-full overflow-hidden">
+<div class="bg-red-500 h-full w-[5%]"></div>
+</div>
+</div>
+</div>
+<div class="mt-8 pt-6 border-t border-slate-100 dark:border-border-dark">
+<button class="w-full py-3 bg-slate-100 dark:bg-neutral-800 hover:bg-slate-200 dark:hover:bg-neutral-700 transition-colors text-sm font-semibold rounded-xl">
+                                Generate Full Report
+                            </button>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-card-dark border border-slate-200 dark:border-border-dark overflow-hidden">
+<div class="p-6 border-b border-slate-200 dark:border-border-dark flex items-center justify-between bg-slate-50/50 dark:bg-neutral-800/30">
+<h3 class="text-xl font-bold">Loan Grading &amp; Indicators</h3>
+<div class="flex gap-2">
+<button class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-neutral-800 border border-slate-200 dark:border-border-dark text-sm font-medium rounded-lg">
+<span class="material-icons-round text-sm">filter_list</span>
+                                Filter
+                            </button>
+<button class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-neutral-800 border border-slate-200 dark:border-border-dark text-sm font-medium rounded-lg">
+<span class="material-icons-round text-sm">download</span>
+                                Export CSV
+                            </button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="text-xs font-bold text-slate-400 uppercase tracking-wider">
+<th class="px-6 py-4">Customer Profile</th>
+<th class="px-6 py-4">AI Segment</th>
+<th class="px-6 py-4">Loan Grade</th>
+<th class="px-6 py-4">Safe Loan Indicator</th>
+<th class="px-6 py-4">Annual Income</th>
+<th class="px-6 py-4">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-border-dark">
+<tr class="hover:bg-slate-50 dark:hover:bg-neutral-900/40 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xs">JH</div>
+<div>
+<p class="font-semibold text-sm">James Harrison</p>
+<p class="text-xs text-slate-500">ID: #C-12093</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2.5 py-1 bg-emerald-100 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold rounded-full uppercase">High-Value</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<span class="w-8 h-8 rounded-lg bg-emerald-500 text-white flex items-center justify-center font-bold text-sm shadow-lg shadow-emerald-500/20">A+</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-1.5 text-emerald-500 font-medium text-sm">
+<span class="material-icons-round text-lg">check_circle</span>
+                                            Recommended
+                                        </div>
+</td>
+<td class="px-6 py-4 text-sm font-medium">$145,000</td>
+<td class="px-6 py-4">
+<button class="p-1.5 hover:bg-slate-200 dark:hover:bg-neutral-800 rounded transition-colors opacity-0 group-hover:opacity-100">
+<span class="material-icons-round text-slate-400">more_vert</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-neutral-900/40 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-blue-100 dark:bg-blue-500/20 flex items-center justify-center text-blue-600 font-bold text-xs">SW</div>
+<div>
+<p class="font-semibold text-sm">Sarah Williams</p>
+<p class="text-xs text-slate-500">ID: #C-12088</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2.5 py-1 bg-blue-100 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 text-xs font-bold rounded-full uppercase">Standard</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<span class="w-8 h-8 rounded-lg bg-blue-500 text-white flex items-center justify-center font-bold text-sm shadow-lg shadow-blue-500/20">B</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-1.5 text-blue-500 font-medium text-sm">
+<span class="material-icons-round text-lg">info</span>
+                                            Moderate Risk
+                                        </div>
+</td>
+<td class="px-6 py-4 text-sm font-medium">$82,400</td>
+<td class="px-6 py-4">
+<button class="p-1.5 hover:bg-slate-200 dark:hover:bg-neutral-800 rounded transition-colors opacity-0 group-hover:opacity-100">
+<span class="material-icons-round text-slate-400">more_vert</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-neutral-900/40 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-orange-100 dark:bg-orange-500/20 flex items-center justify-center text-orange-600 font-bold text-xs">MR</div>
+<div>
+<p class="font-semibold text-sm">Marcus Rodriguez</p>
+<p class="text-xs text-slate-500">ID: #C-12071</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2.5 py-1 bg-orange-100 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 text-xs font-bold rounded-full uppercase">Subprime</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<span class="w-8 h-8 rounded-lg bg-orange-500 text-white flex items-center justify-center font-bold text-sm shadow-lg shadow-orange-500/20">C-</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-1.5 text-red-500 font-medium text-sm">
+<span class="material-icons-round text-lg">warning</span>
+                                            High Risk
+                                        </div>
+</td>
+<td class="px-6 py-4 text-sm font-medium">$45,200</td>
+<td class="px-6 py-4">
+<button class="p-1.5 hover:bg-slate-200 dark:hover:bg-neutral-800 rounded transition-colors opacity-0 group-hover:opacity-100">
+<span class="material-icons-round text-slate-400">more_vert</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-neutral-900/40 transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center text-emerald-600 font-bold text-xs">EL</div>
+<div>
+<p class="font-semibold text-sm">Emily Lawson</p>
+<p class="text-xs text-slate-500">ID: #C-12065</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2.5 py-1 bg-emerald-100 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold rounded-full uppercase">High-Value</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<span class="w-8 h-8 rounded-lg bg-emerald-500 text-white flex items-center justify-center font-bold text-sm shadow-lg shadow-emerald-500/20">A</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-1.5 text-emerald-500 font-medium text-sm">
+<span class="material-icons-round text-lg">check_circle</span>
+                                            Recommended
+                                        </div>
+</td>
+<td class="px-6 py-4 text-sm font-medium">$210,500</td>
+<td class="px-6 py-4">
+<button class="p-1.5 hover:bg-slate-200 dark:hover:bg-neutral-800 rounded transition-colors opacity-0 group-hover:opacity-100">
+<span class="material-icons-round text-slate-400">more_vert</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p-4 border-t border-slate-200 dark:border-border-dark flex items-center justify-between">
+<p class="text-sm text-slate-500">Showing 4 of 24,510 entries</p>
+<div class="flex gap-2">
+<button class="p-2 border border-slate-200 dark:border-border-dark rounded hover:bg-slate-100 dark:hover:bg-neutral-800 transition-colors">
+<span class="material-icons-round text-sm">chevron_left</span>
+</button>
+<button class="p-2 border border-slate-200 dark:border-border-dark rounded hover:bg-slate-100 dark:hover:bg-neutral-800 transition-colors">
+<span class="material-icons-round text-sm">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+
+</body></html>
