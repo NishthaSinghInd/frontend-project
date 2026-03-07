@@ -1,6 +1,40 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 const OverviewPage = () => {
+    const [stats, setStats] = useState({
+        avg_credit_score: 742,
+        total_loan_value: 0,
+        predicted_roi: 0.0,
+        overall_risk: "N/A"
+    });
+    const [recentLoans, setRecentLoans] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchDashboardData = async () => {
+            try {
+                const [statsRes, recentRes] = await Promise.all([
+                    axios.get('/api/portfolio/stats'),
+                    axios.get('/api/loans/recent')
+                ]);
+                setStats(statsRes.data);
+                setRecentLoans(recentRes.data);
+            } catch (error) {
+                console.error("Failed to fetch dashboard data", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchDashboardData();
+    }, []);
+
+    const formatCurrency = (value) => {
+        if (value >= 1000000) return `$${(value / 1000000).toFixed(1)}M`;
+        if (value >= 1000) return `$${(value / 1000).toFixed(0)}k`;
+        return `$${value}`;
+    };
+
     return (
         <div className="max-w-7xl mx-auto space-y-8">
             {/* KPIs */}
@@ -12,7 +46,7 @@ const OverviewPage = () => {
                         </div>
                         <div>
                             <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Avg Credit Score</p>
-                            <p className="text-2xl font-bold">742</p>
+                            <p className="text-2xl font-bold">{stats.avg_credit_score}</p>
                         </div>
                     </div>
                 </div>
@@ -23,8 +57,8 @@ const OverviewPage = () => {
                             <span className="material-icons-round text-primary">payments</span>
                         </div>
                         <div>
-                            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Loan Value</p>
-                            <p className="text-2xl font-bold">$12.4M</p>
+                            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Amount Issued</p>
+                            <p className="text-2xl font-bold">{formatCurrency(stats.total_loan_value)}</p>
                         </div>
                     </div>
                 </div>
@@ -35,8 +69,8 @@ const OverviewPage = () => {
                             <span className="material-icons-round text-purple-600">trending_up</span>
                         </div>
                         <div>
-                            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Predicted ROI</p>
-                            <p className="text-2xl font-bold">8.42%</p>
+                            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Avg Expected ROI</p>
+                            <p className="text-2xl font-bold">{stats.predicted_roi > 0 ? '+' : ''}{stats.predicted_roi}%</p>
                         </div>
                     </div>
                 </div>
@@ -48,7 +82,7 @@ const OverviewPage = () => {
                         </div>
                         <div>
                             <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Overall Risk</p>
-                            <p className="text-2xl font-bold">Moderate</p>
+                            <p className="text-2xl font-bold">{stats.overall_risk}</p>
                         </div>
                     </div>
                 </div>
@@ -134,11 +168,7 @@ const OverviewPage = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100 dark:divide-neutral-800">
-                            {[
-                                { init: 'JS', name: 'James Sterling', id: '#10922', type: 'Mortgage', amt: '$450,000', score: 88, color: 'primary', grade: 'A+', risk: 'Low', status: 'Pre-Approved' },
-                                { init: 'EW', name: 'Emily Wilson', id: '#10923', type: 'Business', amt: '$120,000', score: 54, color: 'orange', grade: 'B-', risk: 'Medium', status: 'Under Review' },
-                                { init: 'RT', name: 'Robert Taylor', id: '#10924', type: 'Personal', amt: '$15,000', score: 22, color: 'red', grade: 'D', risk: 'High', status: 'Flagged' },
-                            ].map((row, i) => (
+                            {recentLoans.length > 0 ? recentLoans.map((row, i) => (
                                 <tr key={i} className="hover:bg-slate-50 dark:hover:bg-neutral-900 transition-colors">
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
@@ -168,20 +198,26 @@ const OverviewPage = () => {
                                     </td>
                                     <td className="px-6 py-4">
                                         <span className={`px-2 py-1 text-[10px] font-bold rounded uppercase ${row.color === 'primary' ? 'bg-primary/10 text-primary' :
-                                                row.color === 'orange' ? 'bg-orange-500/10 text-orange-500' :
-                                                    'bg-red-500/10 text-red-500'
+                                            row.color === 'orange' ? 'bg-orange-500/10 text-orange-500' :
+                                                'bg-red-500/10 text-red-500'
                                             }`}>
                                             {row.risk} Risk ({row.grade})
                                         </span>
                                     </td>
                                     <td className={`px-6 py-4 text-sm font-semibold text-right ${row.color === 'primary' ? 'text-primary' :
-                                            row.color === 'orange' ? 'text-slate-500' :
-                                                'text-red-500'
+                                        row.color === 'orange' ? 'text-slate-500' :
+                                            'text-red-500'
                                         }`}>
                                         {row.status}
                                     </td>
                                 </tr>
-                            ))}
+                            )) : (
+                                <tr>
+                                    <td colSpan="6" className="px-6 py-8 text-center text-slate-500">
+                                        No assessments recorded yet.
+                                    </td>
+                                </tr>
+                            )}
                         </tbody>
                     </table>
                 </div>

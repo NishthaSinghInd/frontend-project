@@ -1,0 +1,114 @@
+--- Inspecting: gradient_boosting_classifier_prepayment_model.pkl ---
+Model Type: <class 'sklearn.ensemble._gb.GradientBoostingClassifier'>
+Expected Features (67): ['loan_amnt' 'int_rate' 'installment' 'annual_inc' 'dti' 'open_acc'
+ 'revol_bal' 'revol_util' 'total_acc' 'delinq_2yrs' 'pub_rec'
+ 'collections_12_mths_ex_med' 'tot_coll_amt' 'term_60months' 'grade_B'
+ 'grade_C' 'grade_D' 'grade_E' 'grade_F' 'grade_G' 'sub_grade_A2'
+ 'sub_grade_A3' 'sub_grade_A4' 'sub_grade_A5' 'sub_grade_B1'
+ 'sub_grade_B2' 'sub_grade_B3' 'sub_grade_B4' 'sub_grade_B5'
+ 'sub_grade_C1' 'sub_grade_C2' 'sub_grade_C3' 'sub_grade_C4'
+ 'sub_grade_C5' 'sub_grade_D1' 'sub_grade_D2' 'sub_grade_D3'
+ 'sub_grade_D4' 'sub_grade_D5' 'sub_grade_E1' 'sub_grade_E2'
+ 'sub_grade_E3' 'sub_grade_E4' 'sub_grade_E5' 'sub_grade_F1'
+ 'sub_grade_F2' 'sub_grade_F3' 'sub_grade_F4' 'sub_grade_F5'
+ 'sub_grade_G1' 'sub_grade_G2' 'sub_grade_G3' 'sub_grade_G4'
+ 'sub_grade_G5' 'emp_length_10years' 'emp_length_2years'
+ 'emp_length_3years' 'emp_length_4years' 'emp_length_5years'
+ 'emp_length_6years' 'emp_length_7years' 'emp_length_8years'
+ 'emp_length_9years' 'emp_length_1year' 'home_ownership_MORTGAGE'
+ 'home_ownership_OWN' 'home_ownership_RENT']
+
+--- Inspecting: kmeans_customer_segmentation.pkl ---
+Model Type: <class 'sklearn.cluster._kmeans.KMeans'>
+Expected Features (22): ['loan_amnt' 'int_rate' 'installment' 'annual_inc' 'dti' 'open_acc'
+ 'revol_bal' 'revol_util' 'total_acc' 'delinq_2yrs' 'pub_rec'
+ 'term_ 60 months' 'emp_length_10+ years' 'emp_length_2 years'
+ 'emp_length_3 years' 'emp_length_4 years' 'emp_length_5 years'
+ 'emp_length_6 years' 'emp_length_7 years' 'emp_length_8 years'
+ 'emp_length_9 years' 'emp_length_< 1 year']
+
+--- Inspecting: linear_regression_safe_loan_model.pkl ---
+Model Type: <class 'sklearn.linear_model._base.LinearRegression'>
+Expected Features (62): ['loan_amnt' 'annual_inc' 'dti' 'revol_bal' 'revol_util' 'total_acc'
+ 'delinq_2yrs' 'pub_rec' 'term__60_months' 'grade_B' 'grade_C' 'grade_D'
+ 'grade_E' 'grade_F' 'grade_G' 'sub_grade_A2' 'sub_grade_A3'
+ 'sub_grade_A4' 'sub_grade_A5' 'sub_grade_B1' 'sub_grade_B2'
+ 'sub_grade_B3' 'sub_grade_B4' 'sub_grade_B5' 'sub_grade_C1'
+ 'sub_grade_C2' 'sub_grade_C3' 'sub_grade_C4' 'sub_grade_C5'
+ 'sub_grade_D1' 'sub_grade_D2' 'sub_grade_D3' 'sub_grade_D4'
+ 'sub_grade_D5' 'sub_grade_E1' 'sub_grade_E2' 'sub_grade_E3'
+ 'sub_grade_E4' 'sub_grade_E5' 'sub_grade_F1' 'sub_grade_F2'
+ 'sub_grade_F3' 'sub_grade_F4' 'sub_grade_F5' 'sub_grade_G1'
+ 'sub_grade_G2' 'sub_grade_G3' 'sub_grade_G4' 'sub_grade_G5'
+ 'emp_length_10__years' 'emp_length_2_years' 'emp_length_3_years'
+ 'emp_length_4_years' 'emp_length_5_years' 'emp_length_6_years'
+ 'emp_length_7_years' 'emp_length_8_years' 'emp_length_9_years'
+ 'emp_length___1_year' 'home_ownership_MORTGAGE' 'home_ownership_OWN'
+ 'home_ownership_RENT']
+
+--- Inspecting: random_forest_regressor_roi_model (1).pkl ---
+Model Type: <class 'sklearn.ensemble._forest.RandomForestRegressor'>
+Expected Features (65): ['loan_amnt' 'int_rate' 'installment' 'annual_inc' 'dti' 'open_acc'
+ 'revol_bal' 'revol_util' 'total_acc' 'delinq_2yrs' 'pub_rec'
+ 'term_60months' 'grade_B' 'grade_C' 'grade_D' 'grade_E' 'grade_F'
+ 'grade_G' 'sub_grade_A2' 'sub_grade_A3' 'sub_grade_A4' 'sub_grade_A5'
+ 'sub_grade_B1' 'sub_grade_B2' 'sub_grade_B3' 'sub_grade_B4'
+ 'sub_grade_B5' 'sub_grade_C1' 'sub_grade_C2' 'sub_grade_C3'
+ 'sub_grade_C4' 'sub_grade_C5' 'sub_grade_D1' 'sub_grade_D2'
+ 'sub_grade_D3' 'sub_grade_D4' 'sub_grade_D5' 'sub_grade_E1'
+ 'sub_grade_E2' 'sub_grade_E3' 'sub_grade_E4' 'sub_grade_E5'
+ 'sub_grade_F1' 'sub_grade_F2' 'sub_grade_F3' 'sub_grade_F4'
+ 'sub_grade_F5' 'sub_grade_G1' 'sub_grade_G2' 'sub_grade_G3'
+ 'sub_grade_G4' 'sub_grade_G5' 'emp_length_10years' 'emp_length_2years'
+ 'emp_length_3years' 'emp_length_4years' 'emp_length_5years'
+ 'emp_length_6years' 'emp_length_7years' 'emp_length_8years'
+ 'emp_length_9years' 'emp_length_1year' 'home_ownership_MORTGAGE'
+ 'home_ownership_OWN' 'home_ownership_RENT']
+
+--- Inspecting: xgboost_classifier_loan_grade_model.pkl ---
+Model Type: <class 'xgboost.sklearn.XGBClassifier'>
+Expected Features (24): ['loan_amnt' 'installment' 'annual_inc' 'dti' 'open_acc' 'revol_bal'
+ 'revol_util' 'total_acc' 'delinq_2yrs' 'pub_rec' 'term__60_months'
+ 'emp_length_10__years' 'emp_length_2_years' 'emp_length_3_years'
+ 'emp_length_4_years' 'emp_length_5_years' 'emp_length_6_years'
+ 'emp_length_7_years' 'emp_length_8_years' 'emp_length_9_years'
+ 'emp_length___1_year' 'home_ownership_MORTGAGE' 'home_ownership_OWN'
+ 'home_ownership_RENT']
+
+--- Inspecting: xgboost_regressor_credit_risk_model.pkl ---
+Model Type: <class 'xgboost.sklearn.XGBRegressor'>
+Expected Features (63): ['loan_amnt' 'annual_inc' 'dti' 'revol_bal' 'revol_util' 'total_acc'
+ 'delinq_2yrs' 'collections_12_mths_ex_med' 'tot_coll_amt'
+ 'term__60_months' 'grade_B' 'grade_C' 'grade_D' 'grade_E' 'grade_F'
+ 'grade_G' 'sub_grade_A2' 'sub_grade_A3' 'sub_grade_A4' 'sub_grade_A5'
+ 'sub_grade_B1' 'sub_grade_B2' 'sub_grade_B3' 'sub_grade_B4'
+ 'sub_grade_B5' 'sub_grade_C1' 'sub_grade_C2' 'sub_grade_C3'
+ 'sub_grade_C4' 'sub_grade_C5' 'sub_grade_D1' 'sub_grade_D2'
+ 'sub_grade_D3' 'sub_grade_D4' 'sub_grade_D5' 'sub_grade_E1'
+ 'sub_grade_E2' 'sub_grade_E3' 'sub_grade_E4' 'sub_grade_E5'
+ 'sub_grade_F1' 'sub_grade_F2' 'sub_grade_F3' 'sub_grade_F4'
+ 'sub_grade_F5' 'sub_grade_G1' 'sub_grade_G2' 'sub_grade_G3'
+ 'sub_grade_G4' 'sub_grade_G5' 'emp_length_10__years' 'emp_length_2_years'
+ 'emp_length_3_years' 'emp_length_4_years' 'emp_length_5_years'
+ 'emp_length_6_years' 'emp_length_7_years' 'emp_length_8_years'
+ 'emp_length_9_years' 'emp_length___1_year' 'home_ownership_MORTGAGE'
+ 'home_ownership_OWN' 'home_ownership_RENT']
+
+--- Inspecting: xgboost_regressor_interest_rate_model.pkl ---
+Model Type: <class 'xgboost.sklearn.XGBRegressor'>
+Expected Features (61): ['loan_amnt' 'annual_inc' 'dti' 'revol_bal' 'revol_util' 'total_acc'
+ 'delinq_2yrs' 'term__60_months' 'grade_B' 'grade_C' 'grade_D' 'grade_E'
+ 'grade_F' 'grade_G' 'sub_grade_A2' 'sub_grade_A3' 'sub_grade_A4'
+ 'sub_grade_A5' 'sub_grade_B1' 'sub_grade_B2' 'sub_grade_B3'
+ 'sub_grade_B4' 'sub_grade_B5' 'sub_grade_C1' 'sub_grade_C2'
+ 'sub_grade_C3' 'sub_grade_C4' 'sub_grade_C5' 'sub_grade_D1'
+ 'sub_grade_D2' 'sub_grade_D3' 'sub_grade_D4' 'sub_grade_D5'
+ 'sub_grade_E1' 'sub_grade_E2' 'sub_grade_E3' 'sub_grade_E4'
+ 'sub_grade_E5' 'sub_grade_F1' 'sub_grade_F2' 'sub_grade_F3'
+ 'sub_grade_F4' 'sub_grade_F5' 'sub_grade_G1' 'sub_grade_G2'
+ 'sub_grade_G3' 'sub_grade_G4' 'sub_grade_G5' 'emp_length_10__years'
+ 'emp_length_2_years' 'emp_length_3_years' 'emp_length_4_years'
+ 'emp_length_5_years' 'emp_length_6_years' 'emp_length_7_years'
+ 'emp_length_8_years' 'emp_length_9_years' 'emp_length___1_year'
+ 'home_ownership_MORTGAGE' 'home_ownership_OWN' 'home_ownership_RENT']
+
