@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.pyc
+
+# Virtual environments
+venv/
+env/
+
+# Node
+node_modules/
+
+# Database
+*.db
+
+# ML models
+*.pkl
+models/
+backend/models/
