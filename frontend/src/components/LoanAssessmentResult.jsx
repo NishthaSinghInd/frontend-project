@@ -1,4 +1,5 @@
 import React from 'react';
+import ShapChart from "../components/ShapChart";
 
 const LoanAssessmentResult = ({ result }) => {
     if (!result) return null;
@@ -7,7 +8,7 @@ const LoanAssessmentResult = ({ result }) => {
 
     // Calculate Gauge Needle Rotation (0 to 180 degrees)
     // 0 is perfectly safe (0 score), 180 is maximum risk (100 score)
-    const rotationDegrees = (result.risk_score / 100) * 180;
+    const rotationDegrees = (result.credit_risk_score / 100) * 180;
 
     return (
         <div className="bg-card-light dark:bg-card-dark p-8 rounded-[2rem] shadow-lg border border-slate-200 dark:border-neutral-800 h-full flex flex-col">
@@ -26,7 +27,14 @@ const LoanAssessmentResult = ({ result }) => {
                 </span>
                 {isApproved ? 'APPROVED' : 'MANUAL REVIEW REQUIRED'}
             </div>
+{/* SHAP Feature Importance */}
+<div className="mt-6">
+    <h4 className="text-md font-semibold mb-2 text-slate-700 dark:text-slate-200">
+        Key Risk Factors
+    </h4>
 
+    <ShapChart data={result?.shap_explanations} />
+</div>
             <div className="flex-grow flex flex-col items-center justify-center space-y-10">
 
                 {/* Risk Score Speedometer */}
@@ -55,8 +63,8 @@ const LoanAssessmentResult = ({ result }) => {
                 <div className="w-full bg-slate-50 dark:bg-neutral-900 p-6 rounded-2xl border border-slate-200 dark:border-neutral-800 flex flex-col items-center justify-center gap-2">
                     <span className="material-icons-round text-slate-400">payments</span>
                     <p className="text-sm font-bold text-slate-400 uppercase tracking-wider">Estimated Expected ROI</p>
-                    <h2 className={`text-4xl font-black ${result.estimated_roi > 0 ? 'text-green-500' : 'text-red-500'}`}>
-                        {result.estimated_roi > 0 ? '+' : ''}{result.estimated_roi}%
+                    <h2 className={`text-4xl font-black ${result.safe_loan_score > 0 ? 'text-green-500' : 'text-red-500'}`}>
+                        {result.safe_loan_score > 0 ? '+' : ''}{result.estimated_roi}%
                     </h2>
                     <p className="text-xs text-slate-500 text-center max-w-[200px] mt-2">Calculated internally via Risk & Interest models.</p>
                 </div>
