@@ -15,7 +15,9 @@ class LoanEngine:
             "interest_rate": joblib.load(model_dir / "xgboost_regressor_interest_rate_pipeline.pkl"),
             "prepayment": joblib.load(model_dir / "gradient_boosting_classifier_prepayment_pipeline.pkl"),
             "safe_loan": joblib.load(model_dir / "linear_regression_safe_loan_pipeline.pkl"),
-            "segmentation": joblib.load(model_dir / "kmeans_customer_segmentation_pipeline.pkl")
+            "segmentation": joblib.load(model_dir / "kmeans_customer_segmentation_pipeline.pkl"),
+            "roi_prediction": joblib.load(model_dir / "random_forest_regressor_roi_pipeline.pkl"),
+            "borrower_network_risk": joblib.load(model_dir / "gnn_borrower_analysis_pipeline.pkl")
         }
 
         print("✅ All ML models loaded successfully")
@@ -78,6 +80,12 @@ class LoanEngine:
         results["safe_loan_score"] = float(self.models["safe_loan"].predict(df)[0])
         results["prepayment_prediction"] = int(self.models["prepayment"].predict(df)[0])
         results["customer_segment"] = int(self.models["segmentation"].predict(df)[0])
+        results["roi_prediction"] = float(self.models["roi_prediction"].predict(df)[0])
+        gnn_model = self.models["borrower_network_risk"]
+        if isinstance(gnn_model, dict):
+            results["borrower_network_risk"] = float(gnn_model.get("risk_score", 0.5))
+        else:
+            results["borrower_network_risk"] = float(gnn_model.predict(df)[0])
 
         # decision logic
         if results["credit_risk_score"] > 0.7:

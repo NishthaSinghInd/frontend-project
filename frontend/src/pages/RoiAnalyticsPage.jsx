@@ -1,9 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 const RoiAnalyticsPage = () => {
     const [baseRate, setBaseRate] = useState(7.25);
     const [volatility, setVolatility] = useState('Medium');
     const [inflationOffset, setInflationOffset] = useState(1.5);
+    const [roiPrediction, setRoiPrediction] = useState(null);
+
+    useEffect(() => {
+    const fetchROI = async () => {
+        try {
+            const res = await axios.post("http://127.0.0.1:8000/api/assess-loan", {
+                borrower_name: "Test User",
+                loan_amnt: 10000,
+                term: "36 months",
+                emp_length: "5 years",
+                home_ownership: "RENT",
+                annual_inc: 60000,
+                dti: 15
+            });
+
+            setRoiPrediction(res.data.roi_prediction);
+        } catch (err) {
+            console.error("ROI fetch failed", err);
+        }
+    };
+
+    fetchROI();
+}, []);
 
     // Simulated calculation
     const calculatedRoi = (12.85 + (baseRate - 7.25) * 1.5 - (inflationOffset - 1.5) * 0.8).toFixed(2);
@@ -21,7 +45,7 @@ const RoiAnalyticsPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 {/* Mini Stat Cards */}
                 {[
-                    { label: 'Predicted ROI', val: '12.85%', icon: 'trending_up', color: 'text-primary', bg: 'bg-primary/10', chg: '+4.2%' },
+                    { label: 'Predicted ROI', val: roiPrediction ? `${roiPrediction.toFixed(2)}%` : 'Loading...', icon: 'trending_up', color: 'text-primary', bg: 'bg-primary/10', chg: '+4.2%' },
                     { label: 'Avg Interest Rate', val: '7.42%', icon: 'percent', color: 'text-blue-500', bg: 'bg-blue-500/10', chg: 'Stable', chgBg: 'bg-slate-100 dark:bg-white/5 text-slate-500' },
                     { label: 'Portfolio Risk Score', val: 'B+', sub: '(Medium)', icon: 'warning_amber', color: 'text-orange-500', bg: 'bg-orange-500/10', chg: '-1.2%' },
                     { label: 'Model Accuracy', val: '98.4%', icon: 'auto_awesome', color: 'text-purple-500', bg: 'bg-purple-500/10', chg: 'AI Active' },

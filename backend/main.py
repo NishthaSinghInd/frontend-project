@@ -135,7 +135,8 @@ def assess_loan(application: LoanApplicationSchema, db: Session = Depends(databa
         emp_length=application.emp_length,
         home_ownership=application.home_ownership,
         risk_score=report["credit_risk_score"],
-        estimated_roi=report["safe_loan_score"],
+        estimated_roi=report["roi_prediction"],
+        borrower_network_risk=report["borrower_network_risk"],
         recommendation=report["recommendation"],
         flag=None
     )

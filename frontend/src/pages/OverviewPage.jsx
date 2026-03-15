@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import client from '../api/client';
 
 const OverviewPage = () => {
     const [stats, setStats] = useState({
@@ -15,8 +16,8 @@ const OverviewPage = () => {
         const fetchDashboardData = async () => {
             try {
                 const [statsRes, recentRes] = await Promise.all([
-                    axios.get('/api/portfolio/stats'),
-                    axios.get('/api/loans/recent')
+                    client.get('/api/portfolio/stats'),
+                    client.get('/api/loans/recent')
                 ]);
                 setStats(statsRes.data);
                 setRecentLoans(recentRes.data);

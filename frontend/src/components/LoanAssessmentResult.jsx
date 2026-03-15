@@ -53,7 +53,7 @@ const LoanAssessmentResult = ({ result }) => {
                     </div>
 
                     <div className="absolute bottom-0 text-3xl font-bold dark:text-white bg-card-light dark:bg-card-dark px-4 py-1 rounded-t-xl z-10">
-                        {result.risk_score} <span className="text-sm font-medium text-slate-400">/ 100</span>
+                        {result.credit_risk_score} <span className="text-sm font-medium text-slate-400">/ 100</span>
                     </div>
                 </div>
 
@@ -68,6 +68,39 @@ const LoanAssessmentResult = ({ result }) => {
                     </h2>
                     <p className="text-xs text-slate-500 text-center max-w-[200px] mt-2">Calculated internally via Risk & Interest models.</p>
                 </div>
+                <div className="w-full grid grid-cols-2 gap-4 mt-6">
+
+    {/* Random Forest ROI Model */}
+    <div className="bg-slate-50 dark:bg-neutral-900 p-4 rounded-xl border border-slate-200 dark:border-neutral-800 text-center">
+        <p className="text-xs uppercase text-slate-400 font-bold tracking-wider">
+            ROI Prediction Model
+        </p>
+
+        <p className="text-2xl font-bold text-green-500 mt-2">
+            {result.roi_prediction?.toFixed(2)}%
+        </p>
+
+        <p className="text-[11px] text-slate-400 mt-1">
+            Random Forest ROI Estimator
+        </p>
+    </div>
+
+    {/* GNN Borrower Risk */}
+    <div className="bg-slate-50 dark:bg-neutral-900 p-4 rounded-xl border border-slate-200 dark:border-neutral-800 text-center">
+        <p className="text-xs uppercase text-slate-400 font-bold tracking-wider">
+            Borrower Network Risk
+        </p>
+
+        <p className="text-2xl font-bold text-red-500 mt-2">
+            {result.borrower_network_risk?.toFixed(2)}
+        </p>
+
+        <p className="text-[11px] text-slate-400 mt-1">
+            Graph Neural Network Risk
+        </p>
+    </div>
+
+</div>
 
                 {/* Optional Guardrail Flag */}
                 {result.flag && (

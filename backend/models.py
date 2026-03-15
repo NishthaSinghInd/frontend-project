@@ -20,6 +20,7 @@ class LoanRecord(Base):
     # AI Results
     risk_score = Column(Float)
     estimated_roi = Column(Float)
+    borrower_network_risk = Column(Float)
     recommendation = Column(String)
     flag = Column(String, nullable=True) # E.g., Business Override
     
