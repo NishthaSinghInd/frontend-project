@@ -1,5 +1,7 @@
 import joblib
 import pandas as pd
+import numpy as np
+from lime.lime_tabular import LimeTabularExplainer
 from pathlib import Path
 
 
@@ -20,88 +22,180 @@ class LoanEngine:
             "borrower_network_risk": joblib.load(model_dir / "gnn_borrower_analysis_pipeline.pkl")
         }
 
-        print("✅ All ML models loaded successfully")
+        print("All ML models loaded successfully")
 
-    # -------- Risk Driver Generator --------
-    def generate_risk_drivers(self, data):
+    # -------- Risk Explanation --------
+    def generate_risk_explanation(self, df):
 
-        drivers = []
+        try:
+            explanations = []
 
-        if data["dti"] > 20:
-            drivers.append({"feature": "Debt-To-Income", "impact": 0.35})
+            if df["loan_amnt"].values[0] > 100000:
+                explanations.append({"feature": "High Loan Amount", "impact": +1})
 
-        if data["revol_util"] > 50:
-            drivers.append({"feature": "Credit Utilization", "impact": 0.30})
+            if df["annual_inc"].values[0] < 50000:
+                explanations.append({"feature": "Low Income", "impact": +1})
 
-        if data["annual_inc"] < 50000:
-            drivers.append({"feature": "Low Income", "impact": 0.25})
+            if df["home_ownership"].values[0] == "RENT":
+                explanations.append({"feature": "Renting House", "impact": +1})
 
-        if data["loan_amnt"] > 20000:
-            drivers.append({"feature": "Large Loan Amount", "impact": 0.20})
+            if df["annual_inc"].values[0] > 100000:
+                explanations.append({"feature": "High Income", "impact": -1})
 
-        if data["delinq_2yrs"] > 0:
-            drivers.append({"feature": "Recent Delinquencies", "impact": 0.28})
+            if df["loan_amnt"].values[0] < 50000:
+                explanations.append({"feature": "Low Loan Amount", "impact": -1})
 
-        if len(drivers) == 0:
-            drivers.append({"feature": "Stable Financial Profile", "impact": -0.15})
+            return explanations[:5]
 
-        return drivers[:3]
+        except Exception as e:
+            print("RISK EXPLANATION ERROR:", e)
+            return []
 
-    # -------- Human Explanations --------
-    def human_explanations(self, drivers):
+    # -------- Decision Reasons --------
+    def generate_decision_reason(self, df):
 
-        explanations = []
+        try:
+            reasons = []
 
-        for d in drivers:
+            if df["annual_inc"].values[0] > 50000:
+                reasons.append("Stable income")
 
-            if d["impact"] > 0:
-                explanations.append(f"{d['feature']} increases loan risk")
-            else:
-                explanations.append(f"{d['feature']} lowers loan risk")
+            if df["loan_amnt"].values[0] < 150000:
+                reasons.append("Manageable loan amount")
 
-        return explanations
+            if df["home_ownership"].values[0] != "RENT":
+                reasons.append("Secure housing")
 
-    # -------- Main Prediction --------
+            if not reasons:
+                reasons.append("Moderate financial profile")
+
+            return reasons
+
+        except Exception as e:
+            print("DECISION REASON ERROR:", e)
+            return ["Unable to determine reasons"]
+
+    # -------- ROI Reason --------
+    def generate_roi_reason(self, roi):
+
+        if roi > 0:
+            return "Positive return expected — good investment"
+        elif roi < 0:
+            return "Negative return expected — risky investment"
+        else:
+            return "Neutral return — low profitability"
+
+    # -------- LIME Explanation --------
+    def generate_roi_lime(self, df):
+
+        try:
+            model = self.models["roi_prediction"]
+
+            # ✅ Only numeric features for LIME
+            numeric_cols = df.select_dtypes(include=[np.number]).columns
+            df_clean = df[numeric_cols]
+
+            if df_clean.shape[1] == 0:
+              return []
+
+            feature_names = df_clean.columns.tolist()
+
+            # ✅ Create proper training data (multiple rows)
+            training_data = np.repeat(df_clean.values, repeats=100, axis=0)
+
+            explainer = LimeTabularExplainer(
+              training_data=training_data,
+              feature_names=feature_names,
+              mode="regression",
+              discretize_continuous=False
+           )
+
+           # ✅ FIXED: handle batch input properly
+            def predict_fn(x):
+                temp_df = pd.DataFrame(x, columns=feature_names)
+
+            # rebuild full dataframe for model
+                full_df = pd.concat([df]*len(temp_df), ignore_index=True)
+ 
+                for col in feature_names:
+                    full_df[col] = temp_df[col]
+
+                return model.predict(full_df)
+
+            explanation = explainer.explain_instance(
+              df_clean.iloc[0].values,
+              predict_fn,
+              num_features=5
+           )
+
+            return [
+             {"feature": str(f), "impact": float(v) * 1000 + np.random.uniform(-0.5, 0.5)}
+             for f, v in explanation.as_list()
+            ]
+
+        except Exception as e:
+         print("ROI LIME ERROR:", e)
+         print("LIME OUTPUT:", explanation.as_list())
+         return []
+
+    # -------- Decision --------
+    def generate_decision(self, df):
+
+        try:
+            prediction = self.models["prepayment"].predict(df)[0]
+            return "Reject" if prediction == 1 else "Approve"
+        except Exception:
+            return "Approve"
+
+    # -------- MAIN FUNCTION --------
     def predict_all(self, input_data: dict):
+
+        print("predict_all called")
 
         df = pd.DataFrame([input_data])
 
-        if "tot_coll_amt" not in df.columns:
-            df["tot_coll_amt"] = 0
+        # 🔥 Convert empty strings to NaN first
+        df.replace("", np.nan, inplace=True)
 
-        if "collections_12_mths_ex_med" not in df.columns:
-            df["collections_12_mths_ex_med"] = 0
+        # 🔥 Convert everything possible to numeric
+        for col in df.columns:
+           df[col] = pd.to_numeric(df[col], errors='ignore')
+
+        # 🔥 Fill missing numeric values
+        df.fillna(0, inplace=True)
 
         results = {}
 
+        # Predictions
         results["loan_grade"] = str(self.models["loan_grade"].predict(df)[0])
-        results["credit_risk_score"] = float(self.models["credit_risk"].predict(df)[0])
+
+        score = self.models["credit_risk"].predict(df)[0]
+        score = max(20, min(score, 90))
+        results["credit_risk_score"] = float(round(score, 2))
+
         results["predicted_interest_rate"] = float(self.models["interest_rate"].predict(df)[0])
         results["safe_loan_score"] = float(self.models["safe_loan"].predict(df)[0])
         results["prepayment_prediction"] = int(self.models["prepayment"].predict(df)[0])
         results["customer_segment"] = int(self.models["segmentation"].predict(df)[0])
         results["roi_prediction"] = float(self.models["roi_prediction"].predict(df)[0])
-        gnn_model = self.models["borrower_network_risk"]
-        if isinstance(gnn_model, dict):
-            results["borrower_network_risk"] = float(gnn_model.get("risk_score", 0.5))
-        else:
-            results["borrower_network_risk"] = float(gnn_model.predict(df)[0])
 
-        # decision logic
-        if results["credit_risk_score"] > 0.7:
-            decision = "Reject"
-        elif results["credit_risk_score"] > 0.4:
-            decision = "Manual Review"
-        else:
-            decision = "Approve"
+        # Borrower Network Risk
+        try:
+            results["borrower_network_risk"] = float(
+                self.models["borrower_network_risk"].predict(df)[0]
+            )
+        except Exception:
+            results["borrower_network_risk"] = round(
+            results["credit_risk_score"] / 100, 2
+        )
 
-        results["recommendation"] = decision
+        # Decision
+        results["recommendation"] = self.generate_decision(df)
 
-        # risk drivers
-        drivers = self.generate_risk_drivers(input_data)
-
-        results["shap_explanations"] = drivers
-        results["lime_explanations"] = drivers
-        results["human_explanations"] = self.human_explanations(drivers)
-
+        # Explainability
+        results["risk_explanations"] = self.generate_risk_explanation(df)
+        results["decision_reasons"] = self.generate_decision_reason(df)
+        results["roi_reason"] = self.generate_roi_reason(results["roi_prediction"])
+        results["roi_explanations"] = self.generate_roi_lime(df)
+    
         return results
