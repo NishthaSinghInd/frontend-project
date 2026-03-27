@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import logoUrl from '../../assets/logo.png';
 
-const Header = ({ title = "Dashboard" }) => {
+const Header = ({ title = "Dashboard", onMenuClick }) => {
     const [isDarkMode, setIsDarkMode] = useState(true);
 
     useEffect(() => {
@@ -46,7 +46,7 @@ const Header = ({ title = "Dashboard" }) => {
                     <span className="material-icons-round text-xl text-red-500">notifications</span>
                     <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-neutral-800"></span>
                 </button>
-                <button className="md:hidden p-2 dark:text-white">
+                <button onClick={onMenuClick} className="md:hidden p-2 dark:text-white">
                     <span className="material-icons-round">menu</span>
                 </button>
             </div>

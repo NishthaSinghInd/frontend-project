@@ -3,31 +3,43 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 
+# Monkey patch for loading older scikit-learn models in newer versions
+import sklearn.compose._column_transformer
+if not hasattr(sklearn.compose._column_transformer, '_RemainderColsList'):
+    _RemainderColsList = type('_RemainderColsList', (list,), {'__module__': 'sklearn.compose._column_transformer'})
+    sklearn.compose._column_transformer._RemainderColsList = _RemainderColsList
+if not hasattr(sklearn.compose, '_RemainderColsList'):
+    sklearn.compose._RemainderColsList = sklearn.compose._column_transformer._RemainderColsList
+
 
 class LoanEngine:
 
     def __init__(self):
 
         model_dir = Path(__file__).parent / "models"
-
-        self.models = {}
-
         try:
-            self.models["safe_loan"] = joblib.load(model_dir / "linear_regression_safe_loan_pipeline.pkl")
-        except:
-            print("safe_loan fallback")
+            self.models = joblib.load(model_dir / "all_models.pkl")
+            print("All ML models loaded successfully from all_models.pkl")
+        except Exception as e:
+            print(f"Could not load all_models.pkl: {e}. Falling back to individual models.")
+            self.models = {}
 
-        try:
-            self.models["segmentation"] = joblib.load(model_dir / "kmeans_customer_segmentation_pipeline.pkl")
-        except:
-            print("segmentation fallback")
+            try:
+                self.models["safe_loan"] = joblib.load(model_dir / "linear_regression_safe_loan_pipeline.pkl")
+            except:
+                print("safe_loan fallback")
 
-        try:
-            self.models["borrower_network_risk"] = joblib.load(model_dir / "gnn_borrower_analysis_pipeline.pkl")
-        except:
-            print("network fallback")
+            try:
+                self.models["segmentation"] = joblib.load(model_dir / "kmeans_customer_segmentation_pipeline.pkl")
+            except:
+                print("segmentation fallback")
 
-        print("SAFE MODE RUNNING")
+            try:
+                self.models["borrower_network_risk"] = joblib.load(model_dir / "gnn_borrower_analysis_pipeline.pkl")
+            except:
+                print("network fallback")
+
+            print("SAFE MODE RUNNING")
 
     # ------------------------------------------------------------------ #
     #  Risk Score formula (shared so SHAP/LIME can perturb it)            #
@@ -45,10 +57,19 @@ class LoanEngine:
         )
         return max(0.0, min(raw, 100.0))
 
-    def _compute_roi(self, risk_score):
-        rate = 3 + (risk_score / 100) * 17
-        expected_loss = (risk_score / 100) * 0.60 * 100
-        return round(rate - expected_loss, 2)
+    def _compute_roi(self, risk_score, int_rate):
+        rate = int_rate
+        
+        # Scale expected default loss aggressively based on risk tier
+        if risk_score > 60:
+            expected_loss = (risk_score / 100) * 45.0 + 10.0
+        elif risk_score > 30:
+            expected_loss = (risk_score / 100) * 15.0 + 2.5
+        else:
+            expected_loss = (risk_score / 100) * 5.0
+            
+        servicing_cost = 1.0 # fixed 1% servicing/admin cost
+        return round(float(rate) - expected_loss - servicing_cost, 2)
 
     # ------------------------------------------------------------------ #
     #  SHAP-style explanation (analytical partial effects)                 #
@@ -100,17 +121,17 @@ class LoanEngine:
     #  LIME-style explanation (local perturbation around input)           #
     # ------------------------------------------------------------------ #
 
-    def _generate_lime(self, income, loan, dti, is_rent):
+    def _generate_lime(self, income, loan, dti, is_rent, int_rate):
         """
         Perturb each feature slightly and measure the change in ROI.
         This gives a local linear approximation of feature importance.
         """
         base_risk = self._compute_risk(income, loan, dti, is_rent)
-        base_roi = self._compute_roi(base_risk)
+        base_roi = self._compute_roi(base_risk, int_rate)
 
         perturbations = {
-            "annual_inc":     income * 0.10,
-            "loan_amnt":      loan * 0.10,
+            "annual_inc":     max(income * 0.10, 1000),
+            "loan_amnt":      max(loan * 0.10, 500),
             "dti":            max(dti * 0.10, 1.0),
             "int_rate":       0.5,
             "installment":    loan / 36 * 0.10,
@@ -118,24 +139,26 @@ class LoanEngine:
 
         results = []
         for feature, delta in perturbations.items():
+            perturbed_int_rate = int_rate
             if feature == "annual_inc":
                 perturbed_risk = self._compute_risk(income + delta, loan, dti, is_rent)
             elif feature == "loan_amnt":
                 perturbed_risk = self._compute_risk(income, loan + delta, dti, is_rent)
             elif feature == "dti":
                 perturbed_risk = self._compute_risk(income, loan, dti + delta, is_rent)
+            elif feature == "int_rate":
+                perturbed_risk = base_risk
+                perturbed_int_rate = int_rate + delta
             else:
-                # int_rate and installment affect ROI directly
+                # installment affect ROI directly
                 perturbed_risk = base_risk
 
-            perturbed_roi = self._compute_roi(perturbed_risk)
+            perturbed_roi = self._compute_roi(perturbed_risk, perturbed_int_rate)
             impact = round(perturbed_roi - base_roi, 4)
             results.append({"feature": feature, "impact": impact})
 
-        # int_rate and installment get manual impacts since they don't affect risk formula
+        # installment gets manual impacts since it doesn't affect risk formula
         for r in results:
-            if r["feature"] == "int_rate":
-                r["impact"] = round(perturbations["int_rate"] * 0.3, 4)
             if r["feature"] == "installment":
                 r["impact"] = round(-(loan / 36 * 0.10) / 10000, 4)
 
@@ -245,6 +268,8 @@ class LoanEngine:
         income = float(df["annual_inc"].values[0])
         loan = float(df["loan_amnt"].values[0])
         dti = float(df["dti"].values[0]) if "dti" in df.columns else 0
+        int_rate = float(df["int_rate"].values[0]) if "int_rate" in df.columns else 10.0
+        int_rate = max(0.0, min(float(int_rate), 100.0))
         is_rent = str(df["home_ownership"].values[0]).upper() == "RENT"
 
         # ---------------------------------------------------------------- #
@@ -292,7 +317,7 @@ class LoanEngine:
         # ---------------------------------------------------------------- #
         #  ROI — formula only, no model                                    #
         # ---------------------------------------------------------------- #
-        roi = self._compute_roi(risk_score)
+        roi = self._compute_roi(risk_score, int_rate)
         results["roi_prediction"] = roi
 
         # ---------------------------------------------------------------- #
@@ -306,9 +331,15 @@ class LoanEngine:
             results["borrower_network_risk"] = round(risk_score / 100, 2)
 
         # ---------------------------------------------------------------- #
-        #  Decision                                                         #
+        #  Decision & Guardrails                                            #
         # ---------------------------------------------------------------- #
         results["recommendation"] = self.generate_decision(df)
+        
+        # Guardrails for highly unrealistic or dangerous loan parameters
+        if loan > (income * 5 + 1) or dti > 60:
+            results["flag"] = "Extreme debt-to-income or extreme loan multiple. Hard auto-reject recommended."
+            results["recommendation"] = "Reject"
+
 
         # ---------------------------------------------------------------- #
         #  Explainability                                                   #
@@ -316,7 +347,7 @@ class LoanEngine:
         results["risk_explanations"] = self.generate_risk_explanation(df)
         results["decision_reasons"] = self.generate_decision_reason(df)
         results["roi_reason"] = self.generate_roi_reason(roi)
-        results["roi_explanations"] = self._generate_lime(income, loan, dti, is_rent)
+        results["roi_explanations"] = self._generate_lime(income, loan, dti, is_rent, int_rate)
         results["shap_explanations"] = self._generate_shap(income, loan, dti, is_rent, risk_score)
 
         return results

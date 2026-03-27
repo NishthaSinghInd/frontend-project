@@ -1,22 +1,19 @@
-from sqlalchemy import create_engine
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlalchemy.orm import declarative_base
-from sqlalchemy.orm import sessionmaker
 
-# Create a local SQLite database file named loans.db
-SQLALCHEMY_DATABASE_URL = "sqlite:///./loans.db"
+# Note: Ensure you have a running PostgreSQL instance matching this URL.
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://postgres:postgres@localhost:5432/loaner_db")
 
-# connect_args={"check_same_thread": False} is needed only for SQLite
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+engine = create_async_engine(DATABASE_URL, echo=True)
+AsyncSessionLocal = async_sessionmaker(engine, expire_on_commit=False)
 
 Base = declarative_base()
 
-# Dependency to get DB session
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+async def get_db():
+    async with AsyncSessionLocal() as session:
+        yield session

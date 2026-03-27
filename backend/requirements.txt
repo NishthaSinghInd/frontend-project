@@ -3,3 +3,7 @@ uvicorn
 axios
 shap
 lime
+sqlalchemy
+asyncpg
+psycopg2-binary
+python-dotenv

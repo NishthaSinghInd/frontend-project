@@ -6,6 +6,7 @@ const LoanAssessmentResult = ({ result }) => {
     if (!result) return null;
 
     const isApproved = result.recommendation === "Approve";
+    const isRejected = result.recommendation === "Reject";
 
     // ✅ FIXED: backend already returns 0–100
     const riskScore = Math.min(result.credit_risk_score ?? 0, 100);
@@ -24,22 +25,29 @@ const LoanAssessmentResult = ({ result }) => {
             </h3>
 
             {/* Decision Banner */}
-            <div className={`p-4 rounded-2xl mb-8 flex items-center justify-center gap-3 text-xl font-bold border-2
-                ${isApproved
-                    ? 'bg-green-50 border-green-200 text-green-700 dark:bg-green-900/20 dark:border-green-800 dark:text-green-400'
-                    : 'bg-yellow-50 border-yellow-200 text-yellow-700 dark:bg-yellow-900/20 dark:border-yellow-800 dark:text-yellow-400'
+            <div className={`p-4 rounded-2xl mb-8 flex items-col border-2 items-center justify-center flex-col
+                ${isApproved ? 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800' 
+                : isRejected ? 'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800' 
+                : 'bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-800'}`}>
+                
+                <div className={`flex items-center gap-3 text-2xl font-black tracking-tight ${
+                    isApproved ? 'text-green-700 dark:text-green-400' 
+                    : isRejected ? 'text-red-700 dark:text-red-400'
+                    : 'text-yellow-700 dark:text-yellow-400'
                 }`}>
-                <span className="material-icons-round text-3xl">
-                    {isApproved ? 'check_circle' : 'warning'}
-                </span>
-                {isApproved ? 'APPROVED' : 'MANUAL REVIEW REQUIRED'}
-{result?.decision_reasons?.length > 0 && (
-  <div className="mt-3 text-sm text-slate-500 text-center">
-    {result.decision_reasons.map((r, i) => (
-      <div key={i}>• {r}</div>
-    ))}
-  </div>
-)}
+                    <span className="material-icons-round text-3xl">
+                        {isApproved ? 'check_circle' : isRejected ? 'cancel' : 'warning'}
+                    </span>
+                    {isApproved ? 'APPROVED' : isRejected ? 'REJECTED' : 'MANUAL REVIEW REQUIRED'}
+                </div>
+
+                {result?.decision_reasons?.length > 0 && (
+                    <div className="mt-3 text-sm font-medium text-slate-500 dark:text-slate-400 text-center">
+                        {result.decision_reasons.map((r, i) => (
+                        <div key={i}>• {r}</div>
+                        ))}
+                    </div>
+                )}
             </div>
 
             {/* ✅ FIXED: Use risk_explanations instead of shap */}

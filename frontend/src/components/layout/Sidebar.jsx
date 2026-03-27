@@ -2,7 +2,7 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import logoUrl from '../../assets/logo.png';
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen, setIsOpen }) => {
     const navLinks = [
         { name: 'Overview', path: '/', icon: 'grid_view' },
         { name: 'Risk Models', path: '/risk-models', icon: 'analytics' },
@@ -11,12 +11,17 @@ const Sidebar = () => {
     ];
 
     return (
-        <aside className="fixed left-0 top-0 h-full w-64 bg-white dark:bg-sidebar-dark border-r border-slate-200 dark:border-zinc-800 z-50 hidden md:flex flex-col">
-            <div className="p-6 flex items-center gap-3 border-b border-transparent">
-                <img src={logoUrl} alt="Loaner Logo" className="w-9 h-9 object-contain" />
-                <span className="text-4xl font-bold tracking-tight text-slate-900 dark:text-white uppercase flex items-center gap-1 mt-1" style={{ fontFamily: '"Gropled", sans-serif' }}>
-                    Loaner<span className="text-primary hidden lg:inline"></span>
-                </span>
+        <aside className={`fixed left-0 top-0 h-full w-64 bg-white dark:bg-sidebar-dark border-r border-slate-200 dark:border-zinc-800 z-50 flex flex-col transition-transform duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+            <div className="p-6 flex items-center justify-between border-b border-transparent">
+                <div className="flex items-center gap-3">
+                    <img src={logoUrl} alt="Loaner Logo" className="w-9 h-9 object-contain" />
+                    <span className="text-4xl font-bold tracking-tight text-slate-900 dark:text-white uppercase flex items-center gap-1 mt-1" style={{ fontFamily: '"Gropled", sans-serif' }}>
+                        Loaner<span className="text-primary hidden lg:inline"></span>
+                    </span>
+                </div>
+                <button className="md:hidden text-slate-500" onClick={() => setIsOpen(false)}>
+                    <span className="material-icons-round">close</span>
+                </button>
             </div>
             <nav className="flex-1 mt-4 px-4 space-y-2 overflow-y-auto custom-scrollbar">
                 {navLinks.map((link) => (

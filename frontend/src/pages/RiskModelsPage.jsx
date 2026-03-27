@@ -55,7 +55,7 @@ const RiskModelsPage = () => {
                             </div>
                             <div>
                                 <p className="text-slate-500 text-sm font-medium">Active Models</p>
-                                <h3 className="text-2xl font-bold dark:text-white">05</h3>
+                                <h3 className="text-2xl font-bold dark:text-white">08</h3>
                             </div>
                         </div>
 

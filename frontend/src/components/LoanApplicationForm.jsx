@@ -17,7 +17,6 @@ const LoanApplicationForm = ({ onSubmit, isLoading }) => {
         delinq_2yrs: 0,
         pub_rec: 0,
         collections_12_mths_ex_med: 0,
-        tot_coll_amt: 0,
         open_acc: "",
         total_acc: "",
         revol_bal: "",
@@ -54,7 +53,7 @@ const LoanApplicationForm = ({ onSubmit, isLoading }) => {
     delinq_2yrs: Number(formData.delinq_2yrs || 0),
     pub_rec: Number(formData.pub_rec || 0),
     collections_12_mths_ex_med: Number(formData.collections_12_mths_ex_med || 0),
-    tot_coll_amt: Number(formData.tot_coll_amt || 0),
+    open_acc: Number(formData.open_acc || 0),
 };
 console.log("Sending to backend:", cleanedData);
     onSubmit(cleanedData);
@@ -93,47 +92,60 @@ console.log("Sending to backend:", cleanedData);
                     <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-neutral-800 pb-2">
                         Requested Loan
                     </h4>
+                    
+                    <div>
+                        <label className="block text-xs font-semibold text-slate-500 mb-1">Loan Amount ($)</label>
+                        <input
+                            type="number"
+                            name="loan_amnt"
+                            placeholder="e.g. 15000"
+                            value={formData.loan_amnt}
+                            onChange={handleChange}
+                            required
+                            className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800"
+                        />
+                    </div>
 
-                    <input
-                        type="number"
-                        name="loan_amnt"
-                        placeholder="Loan Amount ($)"
-                        value={formData.loan_amnt}
-                        onChange={handleChange}
-                        required
-                        className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800"
-                    />
+                    <div>
+                        <label className="block text-xs font-semibold text-slate-500 mb-1">Interest Rate (%)</label>
+                        <input
+                            type="number"
+                            name="int_rate"
+                            placeholder="e.g. 5.5"
+                            value={formData.int_rate}
+                            onChange={handleChange}
+                            required
+                            step="0.1"
+                            max="100"
+                            className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800"
+                        />
+                    </div>
 
-                    <input
-                        type="number"
-                        name="int_rate"
-                        placeholder="Interest Rate (%)"
-                        value={formData.int_rate}
-                        onChange={handleChange}
-                        required
-                        step="0.1"
-                        className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800"
-                    />
+                    <div>
+                        <label className="block text-xs font-semibold text-slate-500 mb-1">Monthly Installment ($)</label>
+                        <input
+                            type="number"
+                            name="installment"
+                            placeholder="e.g. 450"
+                            value={formData.installment}
+                            onChange={handleChange}
+                            required
+                            className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800"
+                        />
+                    </div>
 
-                    <input
-                        type="number"
-                        name="installment"
-                        placeholder="Monthly Installment ($)"
-                        value={formData.installment}
-                        onChange={handleChange}
-                        required
-                        className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800"
-                    />
-
-                    <select
-                        name="term"
-                        value={formData.term}
-                        onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800"
-                    >
-                        <option value="36 months">36 Months</option>
-                        <option value="60 months">60 Months</option>
-                    </select>
+                    <div>
+                        <label className="block text-xs font-semibold text-slate-500 mb-1">Loan Term</label>
+                        <select
+                            name="term"
+                            value={formData.term}
+                            onChange={handleChange}
+                            className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800"
+                        >
+                            <option value="36 months">36 Months</option>
+                            <option value="60 months">60 Months</option>
+                        </select>
+                    </div>
 
                 </div>
 
@@ -144,37 +156,46 @@ console.log("Sending to backend:", cleanedData);
                         Borrower Stats
                     </h4>
 
-                    <input
-                        type="number"
-                        name="annual_inc"
-                        placeholder="Annual Income ($)"
-                        value={formData.annual_inc}
-                        onChange={handleChange}
-                        required
-                        className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800"
-                    />
+                    <div>
+                        <label className="block text-xs font-semibold text-slate-500 mb-1">Annual Income ($)</label>
+                        <input
+                            type="number"
+                            name="annual_inc"
+                            placeholder="e.g. 100000"
+                            value={formData.annual_inc}
+                            onChange={handleChange}
+                            required
+                            className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800"
+                        />
+                    </div>
 
-                    <input
-                        type="number"
-                        name="dti"
-                        placeholder="Debt To Income (%)"
-                        value={formData.dti}
-                        onChange={handleChange}
-                        step="0.1"
-                        required
-                        className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800"
-                    />
+                    <div>
+                        <label className="block text-xs font-semibold text-slate-500 mb-1">Debt To Income (%)</label>
+                        <input
+                            type="number"
+                            name="dti"
+                            placeholder="e.g. 12.5"
+                            value={formData.dti}
+                            onChange={handleChange}
+                            step="0.1"
+                            required
+                            className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800"
+                        />
+                    </div>
 
-                    <select
-                        name="home_ownership"
-                        value={formData.home_ownership}
-                        onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800"
-                    >
-                        <option value="RENT">Rent</option>
-                        <option value="MORTGAGE">Mortgage</option>
-                        <option value="OWN">Own</option>
-                    </select>
+                    <div>
+                        <label className="block text-xs font-semibold text-slate-500 mb-1">Home Ownership</label>
+                        <select
+                            name="home_ownership"
+                            value={formData.home_ownership}
+                            onChange={handleChange}
+                            className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800"
+                        >
+                            <option value="RENT">Rent</option>
+                            <option value="MORTGAGE">Mortgage</option>
+                            <option value="OWN">Own</option>
+                        </select>
+                    </div>
 
                 </div>
 
@@ -185,45 +206,53 @@ console.log("Sending to backend:", cleanedData);
                         Credit File
                     </h4>
 
-                    <input
-                        type="number"
-                        name="delinq_2yrs"
-                        placeholder="Delinquencies (2yr)"
-                        value={formData.delinq_2yrs}
-                        onChange={handleChange}
-                        min="0"
-                        className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800"
-                    />
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Delinquencies (Last 2 Years)</label>
+                        <input
+                            type="number"
+                            name="delinq_2yrs"
+                            value={formData.delinq_2yrs}
+                            onChange={handleChange}
+                            min="0"
+                            className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800"
+                        />
+                    </div>
 
-                    <input
-                        type="number"
-                        name="pub_rec"
-                        placeholder="Public Records"
-                        value={formData.pub_rec}
-                        onChange={handleChange}
-                        min="0"
-                        className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800"
-                    />
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Public Records</label>
+                        <input
+                            type="number"
+                            name="pub_rec"
+                            value={formData.pub_rec}
+                            onChange={handleChange}
+                            min="0"
+                            className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800"
+                        />
+                    </div>
 
-                    <input
-                        type="number"
-                        name="collections_12_mths_ex_med"
-                        placeholder="Collections (12m)"
-                        value={formData.collections_12_mths_ex_med}
-                        onChange={handleChange}
-                        min="0"
-                        className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800"
-                    />
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Collections (Last 12 Months)</label>
+                        <input
+                            type="number"
+                            name="collections_12_mths_ex_med"
+                            value={formData.collections_12_mths_ex_med}
+                            onChange={handleChange}
+                            min="0"
+                            className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800"
+                        />
+                    </div>
 
-                    <input
-                        type="number"
-                        name="tot_coll_amt"
-                        placeholder="Total Collection Amount"
-                        value={formData.tot_coll_amt}
-                        onChange={handleChange}
-                        min="0"
-                        className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800"
-                    />
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Open Credit Accounts</label>
+                        <input
+                            type="number"
+                            name="open_acc"
+                            value={formData.open_acc}
+                            onChange={handleChange}
+                            min="0"
+                            className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800"
+                        />
+                    </div>
 
                 </div>
 
