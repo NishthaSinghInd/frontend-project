@@ -7,11 +7,34 @@ const RiskModelsPage = () => {
     // State to toggle between Dashboard view and Live Input view
     const [viewMode, setViewMode] = useState('dashboard');
     const [assessmentResult, setAssessmentResult] = useState(null);
+    const [bulkResults, setBulkResults] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
+
+    const handleBulkAssessment = async (rowsData) => {
+        setIsLoading(true);
+        setAssessmentResult(null);
+        setBulkResults([]);
+        
+        try {
+            const results = [];
+            // Run sequentially to guarantee orderly processing on dev server
+            for(let row of rowsData) {
+                const response = await axios.post('/api/assess-loan', row);
+                results.push({ ...response.data, _rawInput: row });
+            }
+            setBulkResults(results);
+        } catch (error) {
+            console.error("Bulk Assessment Failed", error);
+            alert("API Connection Failed during Bulk Run.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const handleRunAssessment = async (formData) => {
         setIsLoading(true);
         setAssessmentResult(null);
+        setBulkResults([]);
         try {
             const response = await axios.post('/api/assess-loan', formData);
             setAssessmentResult(response.data);
@@ -182,16 +205,86 @@ const RiskModelsPage = () => {
             {viewMode === 'live-form' && (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <div className="lg:col-span-2">
-                        <LoanApplicationForm onSubmit={handleRunAssessment} isLoading={isLoading} />
+                        <LoanApplicationForm onSubmit={handleRunAssessment} onBulkSubmit={handleBulkAssessment} isLoading={isLoading} />
+                        
+                        {/* BULK RESULTS TABLE */}
+                        {bulkResults.length > 0 && (
+                            <div className="mt-8 bg-card-light dark:bg-card-dark rounded-[2rem] p-8 shadow-lg border border-slate-200 dark:border-neutral-800 animate-fade-in-up">
+                                <h3 className="text-xl font-bold mb-4 flex items-center gap-2 dark:text-white">
+                                    <span className="material-icons-round text-primary">groups</span>
+                                    Bulk Assessment Results ({bulkResults.length})
+                                </h3>
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left border-collapse">
+                                        <thead>
+                                            <tr className="border-b border-slate-200 dark:border-neutral-800 text-slate-500 uppercase text-xs tracking-wider">
+                                                <th className="pb-3 pt-2 font-semibold">Applicant</th>
+                                                <th className="pb-3 pt-2 font-semibold">Loan Amnt</th>
+                                                <th className="pb-3 pt-2 font-semibold">Risk Score</th>
+                                                <th className="pb-3 pt-2 font-semibold">Est. ROI</th>
+                                                <th className="pb-3 pt-2 font-semibold text-right">Decision</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {bulkResults.map((res, i) => {
+                                                const score = res.credit_risk_score || 0;
+                                                const decision = String(res.recommendation || "Unknown").toUpperCase();
+                                                const name = res._rawInput?.borrower_name || "Unknown";
+                                                const amount = res._rawInput?.loan_amnt || 0;
+                                                const roi = Number(res.roi_prediction || 0).toFixed(2);
+                                                
+                                                let badgeColor = "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400";
+                                                if (decision === "REJECT") badgeColor = "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400";
+                                                if (decision === "MANUAL REVIEW") badgeColor = "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400";
+
+                                                return (
+                                                    <tr key={i} className="border-b border-slate-100 dark:border-neutral-800/50 hover:bg-slate-50 dark:hover:bg-neutral-800/50 transition-colors">
+                                                        <td className="py-4 text-sm font-semibold dark:text-white">{name}</td>
+                                                        <td className="py-4 text-sm font-medium text-slate-500">${amount.toLocaleString()}</td>
+                                                        <td className="py-4">
+                                                            <div className="flex items-center gap-2">
+                                                                <div className="w-16 h-2 bg-slate-200 dark:bg-neutral-800 rounded-full overflow-hidden">
+                                                                    <div className={`h-full ${score < 40 ? 'bg-green-500' : score < 70 ? 'bg-yellow-500' : 'bg-red-500'}`} style={{width: `${Math.min(100, score)}%`}}></div>
+                                                                </div>
+                                                                <span className="text-xs font-bold dark:text-slate-300">{Number(score).toFixed(1)}</span>
+                                                            </div>
+                                                        </td>
+                                                        <td className={`py-4 text-sm font-bold ${roi < 0 ? 'text-red-500' : 'text-green-500'}`}>
+                                                            {roi > 0 ? '+' : ''}{roi}%
+                                                        </td>
+                                                        <td className="py-4 text-right">
+                                                            <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${badgeColor}`}>
+                                                                {decision}
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        )}
                     </div>
                     <div className="lg:col-span-1">
-                        {!assessmentResult && !isLoading ? (
+                        {!assessmentResult && !isLoading && bulkResults.length === 0 ? (
                             <div className="bg-slate-100/50 dark:bg-neutral-800/50 rounded-[2rem] p-8 border-2 border-dashed border-slate-300 dark:border-neutral-700 flex flex-col items-center justify-center gap-4 h-full min-h-[400px]">
                                 <span className="material-icons-round text-5xl text-slate-300 dark:text-neutral-600">contact_page</span>
                                 <p className="text-slate-500 font-medium text-center">Fill out the applicant data and run the assessment to view intelligent results here.</p>
                             </div>
-                        ) : (
+                        ) : !assessmentResult && isLoading ? (
+                            <div className="bg-card-light dark:bg-card-dark rounded-[2rem] p-8 shadow-lg border border-slate-200 dark:border-neutral-800 h-full flex flex-col items-center justify-center">
+                                <span className="material-icons-round animate-spin text-4xl text-primary mb-4">data_usage</span>
+                                <p className="font-bold animate-pulse dark:text-white">AI Processing Forms...</p>
+                            </div>
+                        ) : assessmentResult ? (
                             <LoanAssessmentResult result={assessmentResult} />
+                        ) : (
+                            <div className="bg-card-light dark:bg-card-dark rounded-[2rem] p-8 shadow-lg border border-slate-200 dark:border-neutral-800 h-full flex flex-col items-center justify-center">
+                                <span className="material-icons-round text-4xl text-emerald-500 mb-4">check_circle</span>
+                                <p className="font-bold text-lg dark:text-white text-center">Bulk Processing Complete</p>
+                                <p className="text-sm text-slate-500 text-center mt-2">Check the table for detailed breakdowns of all applicants.</p>
+                            </div>
                         )}
                     </div>
                 </div>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const LoanApplicationForm = ({ onSubmit, isLoading }) => {
+const LoanApplicationForm = ({ onSubmit, isLoading, onBulkSubmit }) => {
 
     const [formData, setFormData] = useState({
         borrower_name: "",
@@ -22,6 +22,66 @@ const LoanApplicationForm = ({ onSubmit, isLoading }) => {
         revol_bal: "",
         revol_util: ""
     });
+
+    const handleFileUpload = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const csvText = event.target.result;
+            const lines = csvText.split('\n').map(line => line.trim()).filter(line => line);
+            
+            if (lines.length < 2) {
+                return alert("CSV file needs at least one header row and one data row.");
+            }
+            
+            const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+            
+            // Handle Bulk Read
+            const parsedRows = [];
+            for (let i = 1; i < lines.length; i++) {
+                const values = lines[i].split(',').map(v => v.replace(/"/g, '').trim());
+                if(values.length < headers.length) continue;
+                
+                const rowData = { ...formData };
+                headers.forEach((header, index) => {
+                    const val = values[index];
+                    if (val !== undefined && header in rowData) {
+                        if (!isNaN(val) && val !== "") {
+                            rowData[header] = Number(val);
+                        } else {
+                            rowData[header] = val;
+                        }
+                    }
+                });
+                
+                // Force Numeric Types for Safety 
+                rowData.loan_amnt = Number(rowData.loan_amnt || 0);
+                rowData.int_rate = Number(rowData.int_rate || 0);
+                rowData.installment = Number(rowData.installment || 0);
+                rowData.annual_inc = Number(rowData.annual_inc || 0);
+                rowData.dti = Number(rowData.dti || 0);
+                rowData.delinq_2yrs = Number(rowData.delinq_2yrs || 0);
+                rowData.pub_rec = Number(rowData.pub_rec || 0);
+                rowData.collections_12_mths_ex_med = Number(rowData.collections_12_mths_ex_med || 0);
+                rowData.open_acc = Number(rowData.open_acc || 0);
+                
+                parsedRows.push(rowData);
+            }
+            
+            if (parsedRows.length > 1 && onBulkSubmit) {
+                // Bulk submit!
+                onBulkSubmit(parsedRows);
+            } else if (parsedRows.length === 1) {
+                // Just set form data for 1
+                setFormData(parsedRows[0]);
+            }
+            
+            e.target.value = null; // Reset input so same file can be clicked again
+        };
+        reader.readAsText(file);
+    };
 
     const handleChange = (e) => {
         const { name, value, type } = e.target;
@@ -62,10 +122,26 @@ console.log("Sending to backend:", cleanedData);
     return (
         <form onSubmit={handleSubmit} className="bg-card-light dark:bg-card-dark p-8 rounded-[2rem] shadow-lg border border-slate-200 dark:border-neutral-800">
 
-            <h3 className="text-xl font-bold mb-6 text-slate-800 dark:text-white flex items-center gap-2">
-                <span className="material-icons-round text-primary">person_add</span>
-                New Applicant Profile
-            </h3>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                <h3 className="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                    <span className="material-icons-round text-primary">person_add</span>
+                    New Applicant Profile
+                </h3>
+
+                <div className="relative">
+                    <input 
+                        type="file" 
+                        accept=".csv" 
+                        onChange={handleFileUpload}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        title="Upload CSV Data"
+                    />
+                    <button type="button" className="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-neutral-800 hover:bg-slate-200 dark:hover:bg-neutral-700 text-sm font-semibold rounded-lg transition-colors dark:text-white whitespace-nowrap">
+                        <span className="material-icons-round text-sm">upload_file</span>
+                        Auto-Fill from CSV
+                    </button>
+                </div>
+            </div>
 
             {/* Applicant Name */}
             <div className="mb-6">

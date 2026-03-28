@@ -48,8 +48,8 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
                         className="w-10 h-10 rounded-full border-2 border-primary/20 object-cover"
                     />
                     <div className="overflow-hidden">
-                        <p className="text-sm font-semibold truncate dark:text-white">Alex Henderson</p>
-                        <p className="text-xs text-slate-500 truncate">Senior Underwriter</p>
+                        <p className="text-sm font-semibold truncate dark:text-white">Kevin</p>
+                        <p className="text-xs text-slate-500 truncate"></p>
                     </div>
                 </div>
             </div>

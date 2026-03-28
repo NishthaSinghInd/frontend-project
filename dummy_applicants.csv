@@ -1,0 +1,5 @@
+borrower_name,loan_amnt,term,int_rate,installment,grade,sub_grade,emp_length,home_ownership,annual_inc,dti,delinq_2yrs,pub_rec,collections_12_mths_ex_med,open_acc,total_acc,revol_bal,revol_util
+"Sarah Jenkins",25000,36 months,11.5,825,B,B3,5 years,MORTGAGE,120000,15.5,0,0,0,12,24,15000,45.2
+"Michael Chen",12000,60 months,8.2,244,A,A2,10+ years,OWN,85000,10.1,0,0,0,8,15,5000,22.1
+"Amanda Rodriguez",35000,36 months,15.8,1227,C,C1,2 years,RENT,95000,22.4,1,0,0,14,20,28000,65.8
+"David Thompson",50000,60 months,22.5,1400,F,F2,< 1 year,RENT,65000,38.9,3,1,1,22,40,45000,92.5
